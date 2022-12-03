@@ -28,15 +28,18 @@ def get_comments(youtube, video_id, next_view_token):
 
         # add comment to list
         if len(remove_emojis(str([comment['snippet']['topLevelComment']['snippet']['textDisplay']]))) >=7 :
-
-            authID = [comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value']]
-            authComm = [comment['snippet']['topLevelComment']['snippet']['textDisplay']]
+            try:
+                authID = [comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value']]
+                authComm = [comment['snippet']['topLevelComment']['snippet']['textDisplay']]
+            except:
+                print("Deleted channel")
 
             # to remove author repeated comments.
             if authID not in authList:
                 authList.append(authID)
-
-                authClComm = cleaner(str(authID))+", "+ cleaner(str(authComm))
+                authComm = cleaner(str(authComm))
+                authComm = removeStopwords(str(authComm))
+                authClComm = authComm
 
                 all_comments.append(authClComm.strip())
 
@@ -62,11 +65,11 @@ def startGet(video_id):
     count = 0
 
     # store the result in csv file
-    with open('dataset.csv', 'w', newline='', encoding="utf-8-sig") as f:
-        csvwriter = csv.writer(f)
-
-        for comment in all_comments:
-            csvwriter.writerow([str(comment)])
+    # with open('dataset.csv', 'w', newline='', encoding="utf-8-sig") as f:
+    #     csvwriter = csv.writer(f)
+    #
+    #     for comment in all_comments:
+    #         csvwriter.writerow([str(comment)])
 
     # print result in the terminal
     for comment in all_comments:
