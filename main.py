@@ -6,7 +6,7 @@ url = str(input("Enter Youtube link: "))
 
 parsed_url = urlparse(url)
 
-#get the video id from the url
-videoId = parse_qs(parsed_url.query)['v'][0]
+#get the video id from the url videoId = parse_qs(parsed_url.query)['v'][0]
 
+videoId ="d0FBGY-Jhac&t=154s"
 startGet(str(videoId))
