@@ -14,13 +14,20 @@ def get_comments(youtube, video_id, next_view_token):
     # check for token
     if len(next_view_token.strip()) == 0:
         all_comments = []
-
-    if next_view_token == '':
-        # get the initial response
-        comment_list = youtube.commentThreads().list(part = 'snippet', maxResults = 100, videoId = video_id, order = 'relevance').execute()
-    else:
-        # get the next page response
-        comment_list = youtube.commentThreads().list(part = 'snippet', maxResults = 100, videoId = video_id, order='relevance', pageToken=next_view_token).execute()
+    try:
+        if next_view_token == '':
+            # get the initial response
+            comment_list = youtube.commentThreads().list(part = 'snippet', maxResults = 100, videoId = video_id, order = 'relevance').execute()
+        else:
+            # get the next page response
+            comment_list = youtube.commentThreads().list(part = 'snippet', maxResults = 100, videoId = video_id, order='relevance', pageToken=next_view_token).execute()
+    except Exception as error:
+        if "commentsDisabled" in str(error):
+            print("Comment of this video disabled")
+            print()
+        if "videoNotFound" in str(error):
+            print("Video not found")
+            print()
 
     # loop through all top level comments
     authList = []
@@ -32,17 +39,16 @@ def get_comments(youtube, video_id, next_view_token):
                 authID = [comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value']]
                 authComm = [comment['snippet']['topLevelComment']['snippet']['textDisplay']]
             except:
-                print("Deleted channel")
+                pass
 
             # to remove author repeated comments.
             if authID not in authList:
                 authList.append(authID)
-                authComm = cleaner(str(authComm))
-                authComm = removeStopwords(str(authComm))
-                authComm = stem(str(authComm))
-                authClComm = authComm
 
-                all_comments.append(authClComm.strip())
+                # call preprocessing function in YoutubeAPI file
+                authClComm = preprocessing(authComm)
+                if len(authClComm) >= 3:
+                    all_comments.append(authClComm.strip())
 
         #{2}
 
@@ -66,6 +72,7 @@ def startGet(video_id):
     count = 0
 
     # store the result in csv file
+
     # with open('dataset.csv', 'w', newline='', encoding="utf-8-sig") as f:
     #     csvwriter = csv.writer(f)
     #
