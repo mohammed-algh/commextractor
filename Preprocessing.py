@@ -3,6 +3,8 @@ import re
 import demoji
 from nltk.corpus import stopwords
 from textblob import TextBlob
+from tashaphyne.stemming import ArabicLightStemmer
+from nltk.stem.isri import ISRIStemmer
 
 
 stops = set(stopwords.words("arabic"))
@@ -49,7 +51,7 @@ stop_word = {"،", "آض", "آمينَ", "آه", "آهاً", "آي", "أ", "أب
                       "وَيْ", "وُشْكَانََ", "يكون", "يمكن", "يوم", "ّأيّان"}
 
 
-
+ArListem = ArabicLightStemmer()
 
 # Removing punctuations like . , ! $( ) * % @
 # Removing URLs
@@ -80,3 +82,12 @@ def removeStopwords(text):
     sep = TextBlob(text)
     word = sep.words
     return " ".join([w for w in word if w not in stops and w not in stop_word and len(w) >= 2])
+
+def stem(text):
+    zen = TextBlob(text)
+    words = zen.words
+    cleaned = list()
+    for w in words:
+        ArListem.light_stem(w)
+        cleaned.append(ArListem.get_root())
+    return " ".join(cleaned)

@@ -39,6 +39,7 @@ def get_comments(youtube, video_id, next_view_token):
                 authList.append(authID)
                 authComm = cleaner(str(authComm))
                 authComm = removeStopwords(str(authComm))
+                authComm = stem(str(authComm))
                 authClComm = authComm
 
                 all_comments.append(authClComm.strip())
