@@ -1,6 +1,7 @@
 from googleapiclient.discovery import build
 from Preprocessing import *
 import csv
+import re
 
 api_key = 'AIzaSyCeOTkJfH0_XNhpzeVg3zrDF3Xetgjbt9w'
 
@@ -42,7 +43,7 @@ def get_comments(youtube, video_id, next_view_token):
                 pass
 
             # to remove author repeated comments.
-            if authID not in authList:
+            if authID not in authList and not bool(re.search('[a-zA-Z]+', str(authComm))) and len(str(authComm)) >= 20:
                 authList.append(authID)
 
                 # call preprocessing function in YoutubeAPI file
@@ -73,11 +74,11 @@ def startGet(video_id):
 
     # store the result in csv file
 
-    # with open('dataset.csv', 'w', newline='', encoding="utf-8-sig") as f:
-    #     csvwriter = csv.writer(f)
-    #
-    #     for comment in all_comments:
-    #         csvwriter.writerow([str(comment)])
+    with open('dataset.csv', 'a', newline='', encoding="utf-8-sig") as f:
+        csvwriter = csv.writer(f)
+
+        for comment in all_comments:
+            csvwriter.writerow([str(comment)])
 
     # print result in the terminal
     for comment in all_comments:
@@ -90,5 +91,6 @@ def startGet(video_id):
         #new line
         print()
 
-
-    print(count)
+    print("-----------------------")
+    print("Total comments: "+str(count))
+    print("-----------------------")

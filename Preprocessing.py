@@ -5,6 +5,7 @@ import pyarabic.araby
 from textblob import TextBlob
 from tashaphyne.stemming import ArabicLightStemmer
 from nltk.stem.isri import ISRIStemmer
+#from cleantext import remove_emoji
 
 
 stops = set(stopwords.words("arabic"))
@@ -92,17 +93,23 @@ def stem(text):
         cleaned.append(ArListem.get_root())
     return " ".join(cleaned)
 
+def removeSpecial(text):
+    specials = {'~', ':', "'", '+', '[', '\\', '@', '^', '{', '%', '(', '-', '"', '*', '|', ',', '&', '<', '`', '}', '.', '_', '=', ']', '!', '>', ';', '?', '#', '$', ')', '/', '،', '؟'}
+    return "".join([w for w in text if w not in specials])
+
+
 
 def textNormalize(text):
     text = text.strip()
-    text = re.sub("[إأٱآا]", "ا", text)
-    text = re.sub("ى", "ي", text)
-    text = re.sub("ؤ", "ء", text)
-    text = re.sub("ئ", "ء", text)
-    text = re.sub("ة", "ه", text)
+    # text = re.sub("[إأٱآا]", "ا", text)
+    # text = re.sub("ى", "ي", text)
+    # text = re.sub("ؤ", "ء", text)
+    # text = re.sub("ئ", "ء", text)
+    # text = re.sub("ة", "ه", text)
     noise = re.compile(""" ّ  َ  ً   ُ   ٌ  ِ  ٍ  ْ  ـ """, re.VERBOSE)
     text = re.sub(noise, '', text)
-    text = re.sub(r'(.)\1+', r"\1\1", text)  
+    text = re.sub(r'(.)\1+', r"\1\1", text)
+    text = re.sub(r'[0-9]', '', text)
     return pyarabic.araby.strip_tashkeel(text)
 
 
@@ -110,6 +117,7 @@ def textNormalize(text):
 def preprocessing(text):
     text = cleaner(str(text))
     text = textNormalize(str(text))
-    text = removeStopwords(str(text))
-    text = stem(str(text))
+    #text = removeStopwords(str(text))
+    text = removeSpecial(str(text))
+    #text = stem(str(text))
     return text
