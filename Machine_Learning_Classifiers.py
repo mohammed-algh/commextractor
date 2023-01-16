@@ -124,6 +124,8 @@ def start(classifier, feature_extraction, n):
         n_gram(classifier,n)
     elif feature_extraction == "tfidf":
         tfidf(classifier)
+    else:
+        print("Wrong feature extraction input")
 
 
 # First parameter choose one of these classifiers: SVM, NB, LR, KNN, DT, RF
