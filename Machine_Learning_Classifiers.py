@@ -81,8 +81,22 @@ def knn(X_train, y_train, X_test, y_test):
     pass # Remove pass when you start coding on this classifier
 
 # Decision Tree function
+from sklearn import tree
 def dt(X_train, y_train, X_test, y_test):
-    pass # Remove pass when you start coding on this classifier
+    # Building the model
+    dtClassf = tree.DecisionTreeClassifier() # create the classifier DT
+
+    # Training the model
+    print("Training the model....\n")
+    dtClassf.fit(X_train,y_train) # train the classifier
+
+    # evaluate the model and printing the result
+    y_pred = dtClassf.predict(X_test)
+    accuracyT = metrics.accuracy_score(y_test, y_pred)
+    print(confusion_matrix(y_test,y_pred))
+    print(classification_report(y_test,y_pred))
+    print("The accuracy score of DT: ",accuracyT)
+    print("-----------------------------------------")
 
 # Random Forest function
 def rf(X_train, y_train, X_test, y_test):
@@ -148,4 +162,4 @@ def start(classifier, feature_extraction, n):
 # First parameter choose one of these classifiers: SVM, NB, LR, KNN, DT, RF
 # Second parameter choose one of these feature extraction: ngram, tfidf
 # Third parameter enter n-gram level: 1, 2, 3 (this parameter will be ignored if TF-IDF choosen, but must enter any number)
-start("rf","ngram",1)
+start("DT","ngram",1)
