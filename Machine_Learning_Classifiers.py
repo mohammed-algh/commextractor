@@ -4,6 +4,7 @@ from Preprocessing import doPreprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn import preprocessing
 from sklearn import metrics
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -85,7 +86,23 @@ def dt(X_train, y_train, X_test, y_test):
 
 # Random Forest function
 def rf(X_train, y_train, X_test, y_test):
-    pass # Remove pass when you start coding on this classifier
+
+# Create an instance of the RandomForestClassifier
+
+    # Building the model
+    rfClassf = RandomForestClassifier(max_depth=2, random_state=0)
+
+    # Training the model
+    print("Training the model....\n")
+    rfClassf.fit(X_train,y_train) # train the classifier
+
+    # evaluate the model and printing the result
+    y_pred = rfClassf.predict(X_test)
+    accuracyT = metrics.accuracy_score(y_test, y_pred)
+    print(confusion_matrix(y_test,y_pred))
+    print(classification_report(y_test,y_pred))
+    print("The accuracy score of RainForest: ",accuracyT)
+    print("-----------------------------------------")
 
 
 # preparing the dataset
@@ -131,4 +148,4 @@ def start(classifier, feature_extraction, n):
 # First parameter choose one of these classifiers: SVM, NB, LR, KNN, DT, RF
 # Second parameter choose one of these feature extraction: ngram, tfidf
 # Third parameter enter n-gram level: 1, 2, 3 (this parameter will be ignored if TF-IDF choosen, but must enter any number)
-start("SVM","ngram",1)
+start("rf","ngram",1)
