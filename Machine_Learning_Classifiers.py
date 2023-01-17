@@ -102,9 +102,25 @@ def dt(X_train, y_train, X_test, y_test):
 def rf(X_train, y_train, X_test, y_test):
 
 # Create an instance of the RandomForestClassifier
+    # # For tuning and finding the best parameters and score for Rain Forest classifier
+    # rfClassf = RandomForestClassifier()
+    # param_grid = {
+    # 'n_estimators': [10, 50, 100, 200],
+    # 'max_depth': [None, 5, 10, 20],
+    # 'min_samples_split': [2, 5, 10],
+    # 'min_samples_leaf': [1, 2, 4]
+    # }
+    # grid_search = GridSearchCV(estimator=rfClassf, param_grid=param_grid, scoring='accuracy', cv=5, n_jobs=-1)
+
+    # # Fit the GridSearchCV object to the training data
+    # grid_search.fit(X_train, y_train)
+
+    # # Print the best parameters and the best score
+    # print("Best parameters: ", grid_search.best_params_)
+    # print("Best score: ", grid_search.best_score_)
 
     # Building the model
-    rfClassf = RandomForestClassifier(max_depth=2, random_state=0)
+    rfClassf = RandomForestClassifier(max_depth= None, min_samples_leaf= 2, min_samples_split= 4, n_estimators= 100)
 
     # Training the model
     print("Training the model....\n")
@@ -162,4 +178,4 @@ def start(classifier, feature_extraction, n):
 # First parameter choose one of these classifiers: SVM, NB, LR, KNN, DT, RF
 # Second parameter choose one of these feature extraction: ngram, tfidf
 # Third parameter enter n-gram level: 1, 2, 3 (this parameter will be ignored if TF-IDF choosen, but must enter any number)
-start("DT","ngram",1)
+start("rf","ngram",1)
