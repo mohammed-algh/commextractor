@@ -189,12 +189,16 @@ def dt(X_train, y_train, X_test, y_test, pip_status):
 def rf(X_train, y_train, X_test, y_test, pip_status):
 
 
-    classifier = SVC()  # Change SVC() with your classifier
+    classifier = RandomForestClassifier()  # Change SVC() with your classifier
     if pip_status:
         param_grid = {
             'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
             'transformer__use_idf': [False, True],
             'transformer__norm': ['l1', 'l2'],
+            'classifier__n_estimators': [10, 50, 100, 200],
+            'classifier__max_depth': [None, 5, 10, 20],
+            'classifier__min_samples_split': [2, 5, 10],
+            'classifier__min_samples_leaf': [1, 2, 4]
             # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
         }
 
@@ -271,4 +275,4 @@ def start(classifier, feature_extraction, n, m):
 # First parameter choose one of these classifiers: SVM, NB, LR, KNN, DT, RF
 # Second parameter choose one of these feature extraction: ngram, tfidf
 # Third parameter enter n-gram level: 1, 2, 3 (this parameter will be ignored if TF-IDF choosen, but must enter any number)
-start("DT","pipeline",1,2)
+start("rf","pipeline",1,2)
