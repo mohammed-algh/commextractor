@@ -10,10 +10,12 @@ from sklearn import preprocessing
 from sklearn import metrics
 from sklearn.feature_extraction.text import TfidfVectorizer, TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
 from time import time
+import numpy as np
+from sklearn.naive_bayes import MultinomialNB
 
 
 # Classifiers:   SVM ,  NB ,  LR , KNN , DT , RF
@@ -34,6 +36,26 @@ def calculating(classifier, param_grid, X_train, X_test, y_train, y_test):
     y_pred = gsc.predict(X_test)
     best_param = gsc.best_params_
     best_score = gsc.best_score_
+
+    # df = pd.read_csv("file8.csv", encoding="utf-8-sig") # read dataset
+
+    # pos = 0
+    # neg = 0
+    misclassified = []
+    for comment, pred, label in zip(X_test, y_pred, y_test):
+        if pred != label:
+            # if (label == "0" or label == 0) and neg<4:
+            #     neg+=1
+            #     df = df.replace(comment, "Deleted")
+            # if (label == "1" or label == 1) and pos< 2:
+            #     pos+=1
+            #     df = df.replace(comment, "Deleted")
+            misclassified.append((comment, label, pred))
+    else:
+        for i in misclassified:
+            print(f"The comment's True label is: {i[1]}, Predicted label: {i[2]}, the comment:  {i[0]}")
+        print(f"Number of misclassified comments: {len(misclassified)}")
+        # df.to_csv('file9.csv', index=False, encoding="utf-8-sig")
 
     print_result(y_test, y_pred, best_score, best_param)
     for param_name in sorted(param_grid.keys()):
@@ -79,13 +101,13 @@ def svm(X_train, y_train, X_test, y_test, pip_status):
     classifier = SVC() # Change SVC() with your classifier
     if pip_status:
         param_grid = {
-            'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
-            'transformer__use_idf': [False, True],
-            'transformer__norm': ['l1','l2'],
-            'classifier__kernel': ['linear','rbf'],
-            'classifier__C': [0.1,1,100],
-            'classifier__gamma':[0.1,1,'auto'],
-            'classifier__decision_function_shape': ['ovr','ovo']
+            'vectorizer__ngram_range': [(1, 2)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
+            'transformer__use_idf': [True],
+            'transformer__norm': ['l2'],
+            'classifier__kernel': ["linear","rbf"],
+            'classifier__C': [1],
+            'classifier__gamma':[1],
+            'classifier__decision_function_shape': ['ovr']
             # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
         }
 
@@ -113,7 +135,7 @@ def svm(X_train, y_train, X_test, y_test, pip_status):
 # Naive Bayes function
 def nb(X_train, y_train, X_test, y_test, pip_status):
 
-    classifier = SVC()  # Change SVC() with your classifier
+    classifier = MultinomialNB()  # Change SVC() with your classifier
     if pip_status:
         param_grid = {
             'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
@@ -211,7 +233,7 @@ def rf(X_train, y_train, X_test, y_test, pip_status):
 # preparing the dataset
 def prepare():
     # Read CSV file(Dataset)
-    df = pd.read_csv("finalDataset.csv", encoding="utf-8-sig") # read dataset
+    df = pd.read_csv("finalDataset11.csv", encoding="utf-8-sig") # read dataset
 
     # Encode comment and preparing X
     X = df["Comment"]
@@ -228,7 +250,7 @@ def prepare():
 def print_result(y_test, y_pred, best_score, best_param):
     print(confusion_matrix(y_test,y_pred))
     print(classification_report(y_test,y_pred))
-    print("The accuracy score of model: ",metrics.accuracy_score(y_test, y_pred))
+    print(f"Model accuracy is {accuracy_score(y_test,y_pred)}")
     print("-----------------------------------------")
     # Print the best parameters and the best score
     print("Best score: ", best_score)
@@ -275,4 +297,4 @@ def start(classifier, feature_extraction, n, m):
 # First parameter choose one of these classifiers: SVM, NB, LR, KNN, DT, RF
 # Second parameter choose one of these feature extraction: ngram, tfidf
 # Third parameter enter n-gram level: 1, 2, 3 (this parameter will be ignored if TF-IDF choosen, but must enter any number)
-start("rf","pipeline",1,2)
+start("SVM","pipeline",1,2)
