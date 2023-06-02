@@ -7,14 +7,19 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
 from sklearn import preprocessing
+from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 from sklearn.feature_extraction.text import TfidfVectorizer, TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import GridSearchCV
+
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from time import time
+import numpy as np
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import matthews_corrcoef
 import pickle
 
 
@@ -94,7 +99,7 @@ def svm(X_train, y_train, X_test, y_test, pip_status):
     # print(grid.best_params_)
     # print(grid.score(X_test,y_test))
 
-    classifier = SVC(kernel="linear", gamma=0.1, decision_function_shape="ovr",C=1) # Change SVC() with your classifier
+    classifier = SVC() # Change SVC() with your classifier
     if pip_status:
         param_grid = {
             'vectorizer__ngram_range': [(1, 3)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
@@ -112,29 +117,19 @@ def svm(X_train, y_train, X_test, y_test, pip_status):
     else:
 
         # Building the model
-        classifier = SVC(kernel="linear", gamma=0.1, decision_function_shape="ovr",C=1) # create the classifier SVM
-        param_grid = {
-            'vectorizer__ngram_range': [(1, 3)],  # (1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
-            'transformer__use_idf': [True],
-            'transformer__norm': ['l2'],
-            'classifier__kernel': ["linear"],
-            'classifier__C': [1],
-            'classifier__gamma': [0.1],
-            'classifier__decision_function_shape': ['ovr']
-            # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
-        }
-        calculating(classifier, param_grid, X_train, X_test, y_train, y_test)
-        # # Training the model
-        # print("Training the model....\n")
-        # svmClassf.fit(X_train,y_train) # train the classifier
-        #
-        # # evaluate the model and printing the result
-        # y_pred = svmClassf.predict(X_test)
-        # accuracyT = metrics.accuracy_score(y_test, y_pred)
-        # print(confusion_matrix(y_test,y_pred))
-        # print(classification_report(y_test,y_pred))
-        # print("The accuracy score of SVM: ",accuracyT)
-        # print("-----------------------------------------")
+        svmClassf = SVC(kernel="linear",C=1,degree=1) # create the classifier SVM
+
+        # Training the model
+        print("Training the model....\n")
+        svmClassf.fit(X_train,y_train) # train the classifier
+
+        # evaluate the model and printing the result
+        y_pred = svmClassf.predict(X_test)
+        accuracyT = metrics.accuracy_score(y_test, y_pred)
+        print(confusion_matrix(y_test,y_pred))
+        print(classification_report(y_test,y_pred))
+        print("The accuracy score of SVM: ",accuracyT)
+        print("-----------------------------------------")
 
 
 
@@ -144,12 +139,12 @@ def nb(X_train, y_train, X_test, y_test, pip_status):
     classifier = MultinomialNB()  # Change SVC() with your classifier
     if pip_status:
         param_grid = {
-            'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
-            'transformer__use_idf': [True],
+            'vectorizer__ngram_range': [(1, 3)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
+            'transformer__use_idf': [False],
             'transformer__norm': ['l2'],
-            'transformer__smooth_idf': [False],
-            'transformer__sublinear_tf': [False],
-            'classifier__alpha': [1]
+            'transformer__smooth_idf': [True],
+            'transformer__sublinear_tf': [True],
+            'classifier__alpha': [0.1]
 
         }
 
@@ -162,12 +157,12 @@ def nb(X_train, y_train, X_test, y_test, pip_status):
 # Logistic Regression function
 def lr(X_train, y_train, X_test, y_test, pip_status):
 
-    classifier = SVC()  # Change SVC() with your classifier
+    classifier = LogisticRegression()  # Change SVC() with your classifier
     if pip_status:
         param_grid = {
             'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
-            'transformer__use_idf': [False, True],
-            'transformer__norm': ['l1', 'l2'],
+            'transformer__use_idf': [True],
+            'transformer__norm': ['l2'],
             # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
         }
 
@@ -179,18 +174,19 @@ def lr(X_train, y_train, X_test, y_test, pip_status):
 
 # K-Nearest Neighbors function
 def knn(X_train, y_train, X_test, y_test, pip_status):
-
-    classifier = SVC()  # Change SVC() with your classifier
+    classifier = KNeighborsClassifier()  # Change SVC() with your classifier
     if pip_status:
         param_grid = {
-            'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
-            'transformer__use_idf': [False, True],
-            'transformer__norm': ['l1', 'l2'],
-            # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
-        }
+    'vectorizer__ngram_range': [(1, 3)],
+    'transformer__use_idf': [False],
+    'transformer__norm': ['l1', 'l2'],
+    'classifier__leaf_size': [1],
+    'classifier__metric': ['euclidean'],
+    'classifier__n_neighbors': [13],
+    'classifier__weights': ['distance']
+}
 
         calculating(classifier, param_grid, X_train, X_test, y_train, y_test)
-
     else:
         pass
 
@@ -198,38 +194,37 @@ def knn(X_train, y_train, X_test, y_test, pip_status):
 # Decision Tree function
 def dt(X_train, y_train, X_test, y_test, pip_status):
 
+   
     classifier = DecisionTreeClassifier()  # Change SVC() with your classifier
     if pip_status:
         param_grid = {
             'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
-            'transformer__use_idf': [False, True],
-            'transformer__norm': ['l1', 'l2'],
-            'classifier__max_depth': [2, 4, 6, 8, 10],
-            'classifier__min_samples_split': [2, 4, 6, 8, 10],
-            'classifier__min_samples_leaf': [1, 2, 3, 4, 5]
+            'transformer__use_idf': [True],
+            'transformer__norm': ['l2'],
+            'classifier__max_depth': [None],
+            'classifier__min_samples_split': [2],
+            'classifier__min_samples_leaf': [1]
             # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
         }
 
         calculating(classifier, param_grid, X_train, X_test, y_train, y_test)
-
-    else:
-        pass
 
 
 # Random Forest function
 def rf(X_train, y_train, X_test, y_test, pip_status):
 
 
+
     classifier = RandomForestClassifier()  # Change SVC() with your classifier
     if pip_status:
         param_grid = {
-            'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
-            'transformer__use_idf': [False, True],
-            'transformer__norm': ['l1', 'l2'],
-            'classifier__n_estimators': [10, 50, 100, 200],
-            'classifier__max_depth': [None, 5, 10, 20],
-            'classifier__min_samples_split': [2, 5, 10],
-            'classifier__min_samples_leaf': [1, 2, 4]
+            'vectorizer__ngram_range': [(1, 3)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
+            'transformer__use_idf': [False],
+            'transformer__norm': ['l2'],
+            'classifier__n_estimators': [200],
+            'classifier__max_depth': [None],
+            'classifier__min_samples_split': [2],
+            'classifier__min_samples_leaf': [2]
             # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
         }
 
@@ -260,6 +255,10 @@ def print_result(y_test, y_pred):
     print(confusion_matrix(y_test,y_pred))
     print(classification_report(y_test,y_pred, digits=4))
     print(f"Model accuracy is {accuracy_score(y_test,y_pred)}")
+    print("-----------------------------------------")
+    mcc = matthews_corrcoef(y_test, y_pred)
+    # Print the MCC
+    print("Matthews Correlation Coefficient (MCC):", mcc*100)
     print("-----------------------------------------")
     # Print the best parameters and the best score
     print("Best parameters for the given ngram : ")
