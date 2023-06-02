@@ -14,8 +14,8 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
 from time import time
-import numpy as np
 from sklearn.naive_bayes import MultinomialNB
+import pickle
 
 
 # Classifiers:   SVM ,  NB ,  LR , KNN , DT , RF
@@ -23,19 +23,20 @@ from sklearn.naive_bayes import MultinomialNB
 
 def calculating(classifier, param_grid, X_train, X_test, y_train, y_test):
     estimators = Pipeline([
-        ("vectorizer", CountVectorizer(preprocessor= doPreprocessing)),
-        ("transformer", TfidfTransformer()),
+        ("vectorizer", CountVectorizer(preprocessor= doPreprocessing, ngram_range=(1,3))),
+        ("transformer", TfidfTransformer(norm="l2",use_idf=True, sublinear_tf=True, smooth_idf=True)),
         ("classifier", classifier)
     ])
-    gsc = GridSearchCV(estimators, param_grid, cv=5, n_jobs=-1, verbose=True) # change n_jobs to (your cpu cores - 2) to make your device more comfort
+    # gsc = GridSearchCV(estimators, param_grid, cv=5, n_jobs=-1, verbose=True) # change n_jobs to (your cpu cores - 2) to make your device more comfort
 
     start_time = time()
     print("Training the model...")
-    gsc.fit(X_train, y_train)
+    estimators.fit(X_train, y_train)
     print("Training finished", time() - start_time," Seconds")
-    y_pred = gsc.predict(X_test)
-    best_param = gsc.best_params_
-    best_score = gsc.best_score_
+    pickle.dump(estimators,open("../WASI/NB.pkl","wb"))
+    y_pred = estimators.predict(X_test)
+    # best_param = gsc.best_params_
+    # best_score = gsc.best_score_
 
     # df = pd.read_csv("file8.csv", encoding="utf-8-sig") # read dataset
 
@@ -44,22 +45,17 @@ def calculating(classifier, param_grid, X_train, X_test, y_train, y_test):
     misclassified = []
     for comment, pred, label in zip(X_test, y_pred, y_test):
         if pred != label:
-            # if (label == "0" or label == 0) and neg<4:
-            #     neg+=1
-            #     df = df.replace(comment, "Deleted")
-            # if (label == "1" or label == 1) and pos< 2:
-            #     pos+=1
-            #     df = df.replace(comment, "Deleted")
+            # df = df.replace(comment, "Deleted")
             misclassified.append((comment, label, pred))
     else:
         for i in misclassified:
-            print(f"The comment's True label is: {i[1]}, Predicted label: {i[2]}, the comment:  {i[0]}")
+            print(f"The comment's True label is: {i[1]}, Predicted label: {i[2]}  {i[1]}->{i[2]}, the comment:  {i[0]}")
         print(f"Number of misclassified comments: {len(misclassified)}")
         # df.to_csv('file9.csv', index=False, encoding="utf-8-sig")
 
-    print_result(y_test, y_pred, best_score, best_param)
-    for param_name in sorted(param_grid.keys()):
-        print("%s: %r" % (param_name, gsc.best_params_[param_name]))
+    print_result(y_test, y_pred)
+    # for param_name in sorted(param_grid.keys()):
+    #     print("%s: %r" % (param_name, gsc.best_params_[param_name]))
 
 
 # Training function
@@ -98,15 +94,15 @@ def svm(X_train, y_train, X_test, y_test, pip_status):
     # print(grid.best_params_)
     # print(grid.score(X_test,y_test))
 
-    classifier = SVC() # Change SVC() with your classifier
+    classifier = SVC(kernel="linear", gamma=0.1, decision_function_shape="ovr",C=1) # Change SVC() with your classifier
     if pip_status:
         param_grid = {
-            'vectorizer__ngram_range': [(1, 2)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
+            'vectorizer__ngram_range': [(1, 3)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
             'transformer__use_idf': [True],
             'transformer__norm': ['l2'],
-            'classifier__kernel': ["linear","rbf"],
+            'classifier__kernel': ["linear"],
             'classifier__C': [1],
-            'classifier__gamma':[1],
+            'classifier__gamma':[0.1],
             'classifier__decision_function_shape': ['ovr']
             # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
         }
@@ -116,19 +112,29 @@ def svm(X_train, y_train, X_test, y_test, pip_status):
     else:
 
         # Building the model
-        svmClassf = SVC(kernel="linear",C=1,degree=1) # create the classifier SVM
-
-        # Training the model
-        print("Training the model....\n")
-        svmClassf.fit(X_train,y_train) # train the classifier
-
-        # evaluate the model and printing the result
-        y_pred = svmClassf.predict(X_test)
-        accuracyT = metrics.accuracy_score(y_test, y_pred)
-        print(confusion_matrix(y_test,y_pred))
-        print(classification_report(y_test,y_pred))
-        print("The accuracy score of SVM: ",accuracyT)
-        print("-----------------------------------------")
+        classifier = SVC(kernel="linear", gamma=0.1, decision_function_shape="ovr",C=1) # create the classifier SVM
+        param_grid = {
+            'vectorizer__ngram_range': [(1, 3)],  # (1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
+            'transformer__use_idf': [True],
+            'transformer__norm': ['l2'],
+            'classifier__kernel': ["linear"],
+            'classifier__C': [1],
+            'classifier__gamma': [0.1],
+            'classifier__decision_function_shape': ['ovr']
+            # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
+        }
+        calculating(classifier, param_grid, X_train, X_test, y_train, y_test)
+        # # Training the model
+        # print("Training the model....\n")
+        # svmClassf.fit(X_train,y_train) # train the classifier
+        #
+        # # evaluate the model and printing the result
+        # y_pred = svmClassf.predict(X_test)
+        # accuracyT = metrics.accuracy_score(y_test, y_pred)
+        # print(confusion_matrix(y_test,y_pred))
+        # print(classification_report(y_test,y_pred))
+        # print("The accuracy score of SVM: ",accuracyT)
+        # print("-----------------------------------------")
 
 
 
@@ -139,9 +145,12 @@ def nb(X_train, y_train, X_test, y_test, pip_status):
     if pip_status:
         param_grid = {
             'vectorizer__ngram_range': [(1, 1)], #(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3) TRY EACH ONE
-            'transformer__use_idf': [False, True],
-            'transformer__norm': ['l1', 'l2'],
-            # add yours parameters here (Note: you must write it like this: 'classifier__{name of the parameter}': [ ]
+            'transformer__use_idf': [True],
+            'transformer__norm': ['l2'],
+            'transformer__smooth_idf': [False],
+            'transformer__sublinear_tf': [False],
+            'classifier__alpha': [1]
+
         }
 
         calculating(classifier, param_grid, X_train, X_test, y_train, y_test)
@@ -233,7 +242,7 @@ def rf(X_train, y_train, X_test, y_test, pip_status):
 # preparing the dataset
 def prepare():
     # Read CSV file(Dataset)
-    df = pd.read_csv("finalDataset11.csv", encoding="utf-8-sig") # read dataset
+    df = pd.read_csv("CDS.csv", encoding="utf-8-sig") # read dataset
 
     # Encode comment and preparing X
     X = df["Comment"]
@@ -247,14 +256,13 @@ def prepare():
 
 
 
-def print_result(y_test, y_pred, best_score, best_param):
+def print_result(y_test, y_pred):
     print(confusion_matrix(y_test,y_pred))
-    print(classification_report(y_test,y_pred))
+    print(classification_report(y_test,y_pred, digits=4))
     print(f"Model accuracy is {accuracy_score(y_test,y_pred)}")
     print("-----------------------------------------")
     # Print the best parameters and the best score
-    print("Best score: ", best_score)
-    print("Best parameters  for the given ngram : ")
+    print("Best parameters for the given ngram : ")
 
 
 
@@ -297,4 +305,4 @@ def start(classifier, feature_extraction, n, m):
 # First parameter choose one of these classifiers: SVM, NB, LR, KNN, DT, RF
 # Second parameter choose one of these feature extraction: ngram, tfidf
 # Third parameter enter n-gram level: 1, 2, 3 (this parameter will be ignored if TF-IDF choosen, but must enter any number)
-start("SVM","pipeline",1,2)
+start("NB","pipeline",1,2)
