@@ -5,7 +5,8 @@ import pyarabic.araby
 from textblob import TextBlob
 
 
-stops = set(stopwords.words("arabic"))
+stops = set(stopwords.words("arabic")) # assign all stop words
+# stop words
 stop_word = {"،", "آض", "آمينَ", "آه", "آهاً", "آي", "أ", "أب", "أجل", "أجمع", "أخ", "أخذ", "أصبح", "أضحى",
              "أقبل", "أقل", "أكثر", "ألا", "أم", "أما", "أمامك", "أمامكَ", "أمسى", "أمّا", "أن", "أنا", "أنت",
              "أنتم", "أنتما", "أنتن", "أنتِ", "أنشأ", "أنّى", "أو", "أوشك", "أولئك", "أولئكم", "أولاء",
@@ -49,8 +50,6 @@ stop_word = {"،", "آض", "آمينَ", "آه", "آهاً", "آي", "أ", "أب
              "وَيْ", "وُشْكَانََ", "يكون", "يمكن", "يوم", "ّأيّان"}
 
 
-
-# https://github.com/saobou/arabic-text-preprocessing
 
 
 def removeUrlHtml(text):
@@ -105,6 +104,13 @@ def stemmer(text):
     for w in words:
         cleaned.append(st.stem(w))
     return " ".join(cleaned)
+
+
+def clean_youtube(text):
+    text = removeSymbolNoise(text)
+    text = removeRepeated(text)
+    return text
+
 
 # do all preprocessing functions
 def doPreprocessing(text):
