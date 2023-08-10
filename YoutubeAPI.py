@@ -2,7 +2,7 @@ from googleapiclient.discovery import build
 from Preprocessing import *
 import csv
 
-api_key = 'AIzaSyCeOTkJfH0_XNhpzeVg3zrDF3Xetgjbt9w'
+api_key = ''
 
 #{3}
 
